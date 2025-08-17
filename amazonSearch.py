@@ -1,51 +1,44 @@
 import requests
-import os
+from pprint import pprint
+import json
 
-def search_amazon(query_string):
-
-    payload = {
-    'source': 'amazon_search',
-    'domain': 'in',
-    'query': query_string,
-    'parse': True,
-    'start_page': '1',
-    'pages': '1'
-    }
-
-    response = requests.request(
-        'POST',
-        'https://realtime.oxylabs.io/v1/queries',
-        auth=(os.environ['OXYLABS_USERNAME'], os.environ['OXYLABS_PASSWORD']),
-        json=payload,
-    )
-
-    data = response.json()['results'][0]['content']['results']['organic']
-
+def search_amazon():
+    product_list = ['laptops', 'smart phones', 'headphones', 'earphones', 'smart watches', 'tablets', 'cameras', 'gaming consoles', 'speakers']
     result=[]
-    for i in range(len(data)):
-        if data[i]['rating'] == 0:
-            continue
-        result.append({
-            'title':data[i]['title'],
-            'url':'https://www.amazon.in'+data[i]['url'],
-            'rating':data[i]['rating'],
-            'reviews_count':data[i]['reviews_count'],
-            'price':data[i]['currency']+' '+str(data[i]['price'])
-        })
 
-        if(len(result)==5):
-            break
+    for product in product_list:
+        print(f'Searching for {product}...')
+        payload = {
+            'source': 'amazon_search',
+            'domain': 'in',
+            'query': product,
+            'parse': True,
+            'start_page': '1',
+            'pages': '5'
+        }
 
-    if len(result) == 0:
-        return 'Unable to fetch query results at the moment. Would you like to buy something else!'
+        response = requests.request(
+            'POST',
+            'https://realtime.oxylabs.io/v1/queries',
+            auth=({USERNAME}, {PASSWORD}),
+            json=payload,
+        )
 
-    res_text = 'Here is the list of suitable items.\n'
+        data = response.json()['results'][0]['content']['results']['organic']
 
-    for item in result:
-        res_text=res_text+f'\n{item['title']}\n{item['url']}\n{item['price']}\nRating: {item['rating']}({item['reviews_count']} Reviews)\n'
+        r = min(8, len(data))
+        for i in range (r):
+            if data[i]['rating'] == 0:
+                continue
+            result.append({
+                'title':data[i]['title'],
+                'url':'https://www.amazon.in'+data[i]['url'],
+                'rating':data[i]['rating'],
+                'reviews_count':data[i]['reviews_count'],
+                'price':data[i]['currency']+' '+str(data[i]['price'])
+            })
 
-    print('\n')
+    with open('inventory.json', 'w') as f:
+        json.dump(result, f, indent=4)
 
-    print(res_text)
-
-    return res_text
+search_amazon()
