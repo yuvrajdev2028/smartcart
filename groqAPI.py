@@ -1,9 +1,11 @@
 from groq import Groq
-import os
+from embeddings import query_pinecone
 
-client = Groq(api_key=os.environ['GROQ_API_KEY'])
+client = Groq(api_key='YOUR_API_KEY')
 
-def groq_assistance(products,user_query):
+def groq_assistance(user_query):
+    products=query_pinecone(user_query,5)
+
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
@@ -23,54 +25,7 @@ def groq_assistance(products,user_query):
         stop=None,
     )
 
-    return completion.choices[0].message.content
+    # return completion.choices[0].message.content
+    print(completion.choices[0].message.content)
 
-def search_query_gen(prompt):
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "system",
-                "content": '''You are a helpful assistant. Given a consumer requirement, 
-                                your task is to generate a search query for amazon containing a single product, 
-                                brand name, specs about the product(if specified) and price limitations (if specified). 
-                                Generate a single short query, not multiple queries. Don't put brand names in search query 
-                                if not already specified in the consumer requirement. Only use categorical keywords and not ambiguous words.'''
-            },
-            {
-                "role": "user",
-                "content": f"Consumer requirement:\n{prompt}"
-            },
-        ],
-        temperature=1,
-        max_completion_tokens=1024,
-        top_p=1,
-        stream=False,
-        stop=None,
-    )
-
-    return completion.choices[0].message.content
-
-def prompt_categorisation(prompt):
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "system",
-                "content": '''You are a helpful assistant. Given a consumer prompt, your task is to classify it as either 'search request' 
-                                or 'consumer query'. Output only one of these two categories and no other text. 'Consumer query' will always have indicators 
-                                showing a list of results is already provided to consumer and he is querying on it. 'Search request' will have no such indicators.'''
-            },
-            {
-                "role": "user",
-                "content": f"Consumer Prompt:\n{prompt}"
-            }
-        ],
-        temperature=1,
-        max_completion_tokens=1024,
-        top_p=1,
-        stream=False,
-        stop=None,
-    )
-
-    return completion.choices[0].message.content
+groq_assistance("Find best laptops under 50000")
