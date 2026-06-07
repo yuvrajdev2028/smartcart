@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   MessageSquare,
   X,
@@ -108,7 +108,7 @@ export default function ChatBot({ defaultOpen = false }) {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4" ref={scrollRef}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 scrollbar-hide" ref={scrollRef}>
         <div className="py-4 space-y-4">
           {messages.length === 0 && (
             <div className="space-y-4">
@@ -176,7 +176,7 @@ export default function ChatBot({ defaultOpen = false }) {
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="p-3 border-t border-border/50">

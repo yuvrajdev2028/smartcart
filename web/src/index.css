@@ -116,4 +116,12 @@
     .glow {
         box-shadow: 0 0 40px oklch(0.72 0.19 280 / 15%), 0 0 80px oklch(0.72 0.19 280 / 5%);
     }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 }
